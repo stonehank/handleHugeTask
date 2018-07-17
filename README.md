@@ -1,6 +1,8 @@
 ## web worker VS idleRequestCallback VS setTimeout
 
-***测试平台：FireFox***(Chrome嵌套worker会有[bug](https://bugs.chromium.org/p/chromium/issues/detail?id=31666))
+***测试平台：FireFox***
+
+Chrome嵌套worker会有[BUG](https://bugs.chromium.org/p/chromium/issues/detail?id=31666)
 
 |*方法*             |从0自加至100亿（相同环境）|  
 |-------------------|:--------------:|
@@ -8,6 +10,8 @@
 |web worker(单线程) |29s             |
 |idleRequestCallback|45s             |
 |setTimeout         |61s             |
+
+### [线上测试](https://stonehank.github.io/handleHugeTask/)
 
 一些注意点：
 
