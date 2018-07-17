@@ -116,7 +116,7 @@ F12打开控制台查看
     btnSTO.onclick = function () {
       if (STOrunning) return
       STOrunning = true
-      let eachTask = inpSTO.value || 1000000
+      let eachTask = parseInt(inpSTO.value,10) || 1000000
       STORun(target, eachTask)
       if (cbExtra.checked) startExtra()
     }
@@ -136,7 +136,7 @@ F12打开控制台查看
     btnIdle.onclick = function () {
       if (idleRunning) return
       idleRunning = true
-      let eachTask = inpIdle.value || 2000000
+      let eachTask = parseInt(inpIdle.value,10) || 2000000
       runIDLE(target, eachTask)
 
       if (cbExtra.checked) startExtra()

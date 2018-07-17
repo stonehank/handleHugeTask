@@ -6,8 +6,8 @@
 |-------------------|:--------------:|
 |web worker(10线程) |7s              |
 |web worker(单线程) |29s             |
-|idleRequestCallback|43s             |
-|setTimeout         |62s             |
+|idleRequestCallback|45s             |
+|setTimeout         |61s             |
 
 一些注意点：
 
