@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .ts {
+            width: 100px;
+            height: 100px;
+            background: #ccc;
+            position: relative;
+            animation: mymove 2s infinite alternate linear;
+            -webkit-animation: mymove 2s infinite alternate linear; /*Safari and Chrome*/
+        }
+
+        @keyframes mymove {
+            from {
+                left: 0px;
+            }
+            to {
+                left: 400px;
+            }
+        }
+
+        @-webkit-keyframes mymove /*Safari and Chrome*/
+        {
+            from {
+                left: 0px;
+            }
+            to {
+                left: 400px;
+            }
+        }
+
+        li {
+            margin-top: 15px;
+            list-style: none;
+        }
+
+        button {
+            width: 200px;
+            height: 50px;
+            outline: none;
+            border: none;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px -4px;
+        }
+
+        button:active {
+            box-shadow: none
+        }
+    </style>
+    <script src="requestidlecallback/requestIdleCallback.js"></script>
+    <script src="extra.js"></script>
+    <script src="settimeout/setTimeout.js"></script>
+    <script src="https://rawgit.com/mrdoob/stats.js/master/build/stats.min.js"></script>
+</head>
+<body>
+<div id="testFPS" style="margin-top:50px">流畅性测试</div>
+<div class="ts"></div>
+Chrome的worker嵌套会报错...
+F12打开控制台查看
+<div>
+    <label for="oTarget">目标数：</label>
+    <input id="oTarget" value="10000000000"/>
+    <label for="cbExtra">开启主线程额外任务</label>
+    <input id="cbExtra" type="checkbox"/>
+</div>
+<ul>
+    <li>
+        <button id="btnIdle">点击启动idle计算</button>
+        <label for="inpIdle">每次计算量</label>
+        <input id="inpIdle" value="2000000"/>
+    </li>
+    <li>
+        <button id="btnSTO">点击使用setTimeout计算</button>
+        <label for="inpSTO">每次计算量</label>
+        <input id="inpSTO" value="1000000"/>
+    </li>
+    <li>
+        <button id="btnWorkers">点击启动多线程worker计算</button>
+        <label for="threadNum">开启线程数</label>
+        <input id="threadNum" value="10"/>
+    </li>
+    <li>
+        <button id="btnWorkerSolo">点击启动单线程worker计算</button>
+    </li>
+</ul>
+<script>
+  let idleRunning = false, workerRunning = false, STOrunning = false, workerSoloRunning = false;
+  ;(function () {
+    let btnWorkers = document.getElementById("btnWorkers"),
+      btnIdle = document.getElementById("btnIdle"),
+      cbExtra = document.getElementById("cbExtra"),
+      btnSTO = document.getElementById("btnSTO"),
+      btnWorkerSolo = document.getElementById("btnWorkerSolo"),
+      threadNum = document.getElementById("threadNum"),
+      oTarget = document.getElementById("oTarget"),
+      inpIdle = document.getElementById("inpIdle"),
+      inpSTO = document.getElementById("inpSTO")
+    // 默认100亿
+    target = oTarget.value;
+
+    let stats = new Stats();
+    testFPS.appendChild(stats.dom);
+    requestAnimationFrame(function loop() {
+      stats.update();
+      requestAnimationFrame(loop)
+    });
+
+    oTarget.addEventListener('change', function (e) {
+      target = parseInt(e.target.value, 10)
+    })
+
+
+    btnSTO.onclick = function () {
+      if (STOrunning) return
+      STOrunning = true
+      let eachTask = inpSTO.value || 1000000
+      STORun(target, eachTask)
+      if (cbExtra.checked) startExtra()
+    }
+
+    btnWorkers.onclick = function () {
+      if (workerRunning) return
+      workerRunning = true
+      let worker = new Worker("webworker-multi/workers-run.js")
+      worker.postMessage({target, threadNum: threadNum.value})
+      worker.onmessage = function (e) {
+        if (e.data === "done") workerRunning = false
+      }
+
+      if (cbExtra.checked) startExtra()
+    }
+
+    btnIdle.onclick = function () {
+      if (idleRunning) return
+      idleRunning = true
+      let eachTask = inpIdle.value || 2000000
+      runIDLE(target, eachTask)
+
+      if (cbExtra.checked) startExtra()
+    }
+
+    btnWorkerSolo.onclick = function () {
+      if (workerSoloRunning) return
+      workerSoloRunning = true;
+      let workerSolo = new Worker("webworker-solo/worker-solo.js")
+      workerSolo.postMessage(target)
+      workerSolo.onmessage = function (e) {
+        if (e.data === "done") workerSoloRunning = false
+      }
+
+      if (cbExtra.checked) {
+        startExtra()
+      }
+    }
+
+    function startExtra() {
+      extra(400000000)
+    }
+  })()
+
+</script>
+</body>
+</html>
