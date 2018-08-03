@@ -1,7 +1,8 @@
 ;(function(){
   function STORun(target,eachTask){
     console.log("\nSTO开始执行")
-    console.time("STO耗时")
+    let t=performance.now()
+    // console.time("STO耗时")
     let taskSum=0
 
     // 分割为小任务
@@ -22,7 +23,8 @@
       }else{
         console.log(target,"STO目标完成！")
         STOrunning=false
-        console.timeEnd("STO耗时")
+        alert("SetTimeout耗时"+(performance.now()-t).toFixed(1)+"ms")
+        // console.timeEnd("STO耗时")
       }
     }
     run(target)

@@ -1,7 +1,8 @@
 ;(function(){
   function runIDLE(target,eachTask) {
     console.log("\nidle开始执行,准备开始首次调用执行函数")
-    console.time("idle耗时")
+    let t=performance.now()
+    // console.time("idle耗时")
 
     let taskSum = 0
 
@@ -25,7 +26,8 @@
       } else {
         console.log(target ,"idle完成目标!")
         idleRunning=false
-        console.timeEnd("idle耗时")
+        // console.timeEnd("idle耗时")
+        alert("Idle耗时"+(performance.now()-t).toFixed(1)+"ms")
       }
     }, {timeout: 1000})
 

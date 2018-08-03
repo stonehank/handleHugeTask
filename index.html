@@ -5,9 +5,10 @@
     <title>Title</title>
     <style>
         .ts {
-            width: 100px;
-            height: 100px;
+            width: 30px;
+            height: 30px;
             background: #ccc;
+            color:#ccc;
             position: relative;
             animation: mymove 2s infinite alternate linear;
             -webkit-animation: mymove 2s infinite alternate linear; /*Safari and Chrome*/
@@ -56,31 +57,40 @@
     <script src="https://rawgit.com/mrdoob/stats.js/master/build/stats.min.js"></script>
 </head>
 <body>
-<div id="testFPS" style="margin-top:50px">流畅性测试</div>
-<div class="ts"><!--test--></div>
+<div id="testFPS" style="margin-top:50px">
+    流畅性测试
+    <!--<div class="ts">1</div>-->
+</div>
+
 Chrome的worker嵌套会报错...
 F12打开控制台查看
 <div>
-    <label for="oTarget">目标数：</label>
-    <input id="oTarget" value="10000000000"/>
+    <label for="inpTarget">目标数：</label>
+    <input id="inpTarget" value="10000000000"/>
     <label for="cbExtra">开启主线程额外任务</label>
     <input id="cbExtra" type="checkbox"/>
 </div>
 <ul>
-    <li>
+    <li id="idle">
         <button id="btnIdle">点击启动idle计算</button>
-        <label for="inpIdle">每次计算量</label>
-        <input id="inpIdle" value="2000000"/>
+        <div>
+            <label for="inpIdle">每次计算量</label>
+            <input id="inpIdle" value="2000000"/>
+        </div>
     </li>
-    <li>
+    <li id="STO">
         <button id="btnSTO">点击使用setTimeout计算</button>
-        <label for="inpSTO">每次计算量</label>
-        <input id="inpSTO" value="1000000"/>
+       <div>
+           <label for="inpSTO">每次计算量</label>
+           <input id="inpSTO" value="1000000"/>
+       </div>
     </li>
-    <li>
+    <li id="multiWorker">
         <button id="btnWorkers">点击启动多线程worker计算</button>
-        <label for="threadNum">开启线程数</label>
-        <input id="threadNum" value="10"/>
+        <div>
+            <label for="threadNum">开启线程数</label>
+            <input id="threadNum" value="10"/>
+        </div>
     </li>
     <li>
         <button id="btnWorkerSolo">点击启动单线程worker计算</button>
@@ -90,16 +100,22 @@ F12打开控制台查看
   let idleRunning = false, workerRunning = false, STOrunning = false, workerSoloRunning = false;
   ;(function () {
     let btnWorkers = document.getElementById("btnWorkers"),
-      btnIdle = document.getElementById("btnIdle"),
-      cbExtra = document.getElementById("cbExtra"),
-      btnSTO = document.getElementById("btnSTO"),
-      btnWorkerSolo = document.getElementById("btnWorkerSolo"),
       threadNum = document.getElementById("threadNum"),
-      oTarget = document.getElementById("oTarget"),
+
+      btnWorkerSolo = document.getElementById("btnWorkerSolo"),
+
+      btnIdle = document.getElementById("btnIdle"),
       inpIdle = document.getElementById("inpIdle"),
-      inpSTO = document.getElementById("inpSTO")
+
+
+      btnSTO = document.getElementById("btnSTO"),
+      inpSTO = document.querySelector("#inpSTO"),
+
+      inpTarget = document.getElementById("inpTarget"),
+      cbExtra = document.getElementById("cbExtra"),
+
     // 默认100亿
-    target = oTarget.value;
+    target = inpTarget.value;
 
     let stats = new Stats();
     testFPS.appendChild(stats.dom);
@@ -108,7 +124,7 @@ F12打开控制台查看
       requestAnimationFrame(loop)
     });
 
-    oTarget.addEventListener('change', function (e) {
+    inpTarget.addEventListener('change', function (e) {
       target = parseInt(e.target.value, 10)
     })
 
@@ -127,7 +143,10 @@ F12打开控制台查看
       let worker = new Worker("webworker-multi/workers-run.js")
       worker.postMessage({target, threadNum: threadNum.value})
       worker.onmessage = function (e) {
-        if (e.data === "done") workerRunning = false
+        if (e.data.msg === "done") {
+          workerRunning = false
+          alert("多线程耗时："+e.data.time+"ms")
+        }
       }
 
       if (cbExtra.checked) startExtra()
@@ -148,7 +167,10 @@ F12打开控制台查看
       let workerSolo = new Worker("webworker-solo/worker-solo.js")
       workerSolo.postMessage(target)
       workerSolo.onmessage = function (e) {
-        if (e.data === "done") workerSoloRunning = false
+        if (e.data.msg === "done") {
+          workerSoloRunning = false
+          alert("单线程耗时："+e.data.time+"ms")
+        }
       }
 
       if (cbExtra.checked) {
